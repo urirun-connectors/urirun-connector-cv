@@ -1,0 +1,122 @@
+{
+  "contracts": {
+    "cv://host/document/query/parse": {
+      "version": "v1",
+      "effect": "query",
+      "reversible": false,
+      "inp": {
+        "path": "?str",
+        "text": "?str",
+        "use_llm": "?bool",
+        "model": "?str"
+      },
+      "out": {
+        "connector": "const:cv",
+        "kind": "const:cv",
+        "live": "bool",
+        "path": "str",
+        "method": "str",
+        "fields": "obj"
+      },
+      "errors": [
+        "precondition-unmet",
+        "degraded-backend"
+      ],
+      "examples": [
+        {
+          "payload": {
+            "text": "Jan Kowalski\nul. Testowa 1, Warszawa\nStanowisko: Programista\nUmiejętności: Python, SQL",
+            "use_llm": false
+          },
+          "result": {
+            "ok": true,
+            "connector": "cv",
+            "kind": "cv",
+            "live": false,
+            "path": "",
+            "method": "given-text",
+            "fields": {
+              "full_name": null,
+              "address": null,
+              "email": null,
+              "phone": null,
+              "position": null,
+              "skills": [],
+              "experience": [],
+              "education": [],
+              "languages": [],
+              "summary": null,
+              "raw_text": "Jan Kowalski\nul. Testowa 1, Warszawa\nStanowisko: Programista\nUmiejętności: Python, SQL"
+            }
+          }
+        }
+      ]
+    },
+    "cv://host/folder/query/batch": {
+      "version": "v1",
+      "effect": "query",
+      "reversible": false,
+      "inp": {
+        "root": "str",
+        "extensions": "?str",
+        "recursive": "?bool",
+        "use_llm": "?bool",
+        "max_files": "?int",
+        "model": "?str"
+      },
+      "out": {
+        "connector": "const:cv",
+        "kind": "const:cv-batch",
+        "live": "bool",
+        "root": "str",
+        "files": "int",
+        "parsed": "int",
+        "rows": "list"
+      },
+      "errors": [
+        "precondition-unmet"
+      ],
+      "examples": [
+        {
+          "payload": {
+            "root": "/tmp/cv-inbox"
+          },
+          "result": {
+            "ok": true,
+            "connector": "cv",
+            "kind": "cv-batch",
+            "live": false,
+            "root": "/tmp/cv-inbox",
+            "files": 0,
+            "parsed": 0,
+            "rows": []
+          }
+        }
+      ]
+    },
+    "cv://host/doctor/query/report": {
+      "version": "v1",
+      "effect": "query",
+      "reversible": false,
+      "inp": {},
+      "out": {
+        "ok": "bool",
+        "connector": "const:cv",
+        "version": "str",
+        "status": "const:ready"
+      },
+      "errors": [],
+      "examples": [
+        {
+          "payload": {},
+          "result": {
+            "ok": true,
+            "connector": "cv",
+            "version": "0.1.0",
+            "status": "ready"
+          }
+        }
+      ]
+    }
+  }
+}

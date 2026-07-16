@@ -1,0 +1,74 @@
+{
+  "id": "cv",
+  "name": "CV / resume field extraction",
+  "uriSchemes": [
+    "cv"
+  ],
+  "status": "available",
+  "category": "HR",
+  "summary": "Extract structured fields from CVs/resumes over cv:// URIs — name, contact details, position, skills, experience, education, languages. Text via python-docx (DOCX) or doc:// OCR (PDF/image), fields via an LLM pass (OpenRouter).",
+  "description": "cv:// turns résumé parsing into a first-class URI. cv://host/document/query/parse returns structured fields {full_name, address, email, phone, position, skills, experience, education, languages, summary, raw_text} from one PDF/DOCX/image/text file — DOCX is read directly via python-docx, everything else is delegated to doc:// (urirun-connector-ocr, which already layers pdftotext/PaddleOCR/tesseract). Unlike invoice://, a CV has no stable label grammar to regex against, so field extraction is LLM-first (OpenRouter via litellm) rather than regex-first with an LLM fallback; use_llm=false returns only the extracted raw text so OCR quality can be inspected before spending an LLM call. cv://host/folder/query/batch parses every CV under a folder into rows, for a one-off backlog import. Read-only over the CV files.",
+  "requires": {
+    "system": [
+      "poppler-utils (pdftotext/pdftoppm) and/or tesseract, via doc:// — for PDF/image CVs"
+    ],
+    "python": [
+      "urirun",
+      "urirun-connector-ocr"
+    ],
+    "optional": [
+      "python-docx for DOCX CVs",
+      "litellm + OPENROUTER_API_KEY for field extraction (use_llm=true, the default)"
+    ]
+  },
+  "keywords": [
+    "cv",
+    "resume",
+    "hr",
+    "recruitment",
+    "ocr",
+    "extraction",
+    "contract"
+  ],
+  "publisher": {
+    "name": "if-uri",
+    "url": "https://ifuri.com",
+    "github": "https://github.com/if-uri"
+  },
+  "routes": [
+    "cv://host/document/query/parse",
+    "cv://host/folder/query/batch",
+    "cv://host/doctor/query/report"
+  ],
+  "useCases": [
+    "Extract a candidate's name, contact details, position, skills and experience from a submitted CV.",
+    "Feed extracted CV fields into a contract-generation template's variables.",
+    "Batch-import a backlog folder of CVs into structured rows.",
+    "Inspect OCR text quality on a scanned CV before spending an LLM call (use_llm=false)."
+  ],
+  "examples": [
+    {
+      "title": "Parse one CV",
+      "uri": "cv://host/document/query/parse",
+      "payload": {
+        "path": "/cv-inbox/jan-kowalski.pdf"
+      }
+    },
+    {
+      "title": "Batch-parse a folder",
+      "uri": "cv://host/folder/query/batch",
+      "payload": {
+        "root": "/cv-inbox"
+      }
+    }
+  ],
+  "provenance": "verified",
+  "docsUrl": "https://github.com/urirun-connectors/urirun-connector-cv",
+  "install": {
+    "mode": "urirun-extra",
+    "pipSpec": "urirun-connector-cv @ git+https://github.com/urirun-connectors/urirun-connector-cv.git@v0.1.0"
+  },
+  "adapterKinds": [
+    "local-function"
+  ]
+}

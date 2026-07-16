@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "urirun-connector-cv"
+version = "0.1.0"
+description = "CV / resume field-extraction connector for ifuri and urirun (cv://)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+authors = [{ name = "if-uri" }]
+dependencies = ["urirun>=0.4.14", "urirun-connector-ocr>=0.1.0"]
+
+[project.optional-dependencies]
+docx = ["python-docx>=1.0"]
+llm = ["litellm>=1.0"]
+test = ["pytest>=8"]
+
+[project.urls]
+Homepage = "https://connect.ifuri.com/connectors/cv"
+Repository = "https://github.com/urirun-connectors/urirun-connector-cv"
+
+[project.scripts]
+urirun-cv = "urirun_connector_cv.core:main"
+
+[project.entry-points."urirun.bindings"]
+cv = "urirun_connector_cv.core:urirun_bindings"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["urirun_connector_cv*"]
+
+[tool.setuptools.package-data]
+urirun_connector_cv = ["connector.manifest.json", "contracts.json"]
