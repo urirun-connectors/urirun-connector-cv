@@ -10,9 +10,13 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
 authors = [{ name = "if-uri" }]
-dependencies = ["urirun>=0.4.14", "urirun-connector-ocr>=0.1.0"]
+dependencies = ["urirun>=0.4.14"]
 
 [project.optional-dependencies]
+# urirun-connector-ocr is not on PyPI (git-only, like every connector in this ecosystem)
+# so it cannot be a resolvable dependency here; install it separately:
+#   pip install "urirun-connector-ocr @ git+https://github.com/urirun-connectors/urirun-connector-ocr.git"
+# _extract_text() imports it lazily and degrades to a clear error if it's absent.
 docx = ["python-docx>=1.0"]
 llm = ["litellm>=1.0"]
 test = ["pytest>=8"]
