@@ -130,9 +130,9 @@ def test_extract_with_oqllm_docker(monkeypatch):
     try:
         with urllib.request.urlopen("http://127.0.0.1:11437/health", timeout=1.0) as resp:
             if resp.status != 200:
-                return
+                pytest.skip("OQLLM Docker not healthy")
     except Exception:
-        return
+        pytest.skip("OQLLM Docker not reachable on 11437")
 
     monkeypatch.setenv("CV_LLM_API_BASE", "http://127.0.0.1:11437/v1")
     monkeypatch.setenv("CV_LLM_API_KEY", "oqllm_live_loopback_root")
@@ -141,3 +141,40 @@ def test_extract_with_oqllm_docker(monkeypatch):
     assert isinstance(res, dict)
     assert "input_format" in res
 
+
+class _Resp:
+    def __init__(self, content):
+        msg = type("M", (), {"content": content})()
+        self.choices = [type("C", (), {"message": msg})()]
+
+    def __getitem__(self, key):  # dict-style access used by some connectors
+        return {"choices": [{"message": {"content": self.choices[0].message.content}}]}[key]
+
+
+def _capture(monkeypatch):
+    import litellm
+    seen = {}
+    def fake(**kw):
+        seen.update(kw)
+        return _Resp('{"ok": true}')
+    monkeypatch.setattr(litellm, "completion", fake)
+    for var in ("URIRUN_LLM_API_BASE", "URIRUN_LLM_API_KEY", "OQLLM_API_KEY", "OPENAI_API_BASE", "CV_LLM_API_BASE", "CV_LLM_API_KEY"):
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-openai-must-not-leak")
+    return seen
+
+
+def test_default_call_does_not_forward_foreign_credentials(monkeypatch):
+    seen = _capture(monkeypatch)
+    c._llm_extract("Jan Kowalski", "openrouter/qwen/qwen3.7-plus")
+    assert "api_key" not in seen and "api_base" not in seen
+    assert seen["model"].startswith("openrouter/")
+
+
+def test_explicit_gateway_gets_only_gateway_key(monkeypatch):
+    seen = _capture(monkeypatch)
+    monkeypatch.setenv("CV_LLM_API_BASE", "http://127.0.0.1:11437/v1")
+    monkeypatch.setenv("OQLLM_API_KEY", "oqllm-key")
+    c._llm_extract("Jan Kowalski", "openrouter/qwen/qwen3.7-plus")
+    assert seen["api_base"] == "http://127.0.0.1:11437/v1"
+    assert seen["api_key"] == "oqllm-key"

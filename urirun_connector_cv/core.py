@@ -95,13 +95,13 @@ def _llm_extract(text: str, model: str) -> dict[str, Any] | None:
             "temperature": 0,
             "max_tokens": 1500,
         }
-        api_base = os.environ.get("CV_LLM_API_BASE") or os.environ.get("URIRUN_LLM_API_BASE") or os.environ.get("OPENAI_API_BASE")
+        api_base = os.environ.get("CV_LLM_API_BASE") or os.environ.get("URIRUN_LLM_API_BASE")
         if api_base:
             kwargs["api_base"] = api_base
             if not (model.startswith("openai/") or model.startswith("openrouter/")):
                 kwargs["model"] = f"openai/{model}"
-        api_key = os.environ.get("CV_LLM_API_KEY") or os.environ.get("OQLLM_API_KEY") or os.environ.get("OPENAI_API_KEY")
-        if api_key:
+        api_key = os.environ.get("CV_LLM_API_KEY") or os.environ.get("URIRUN_LLM_API_KEY") or os.environ.get("OQLLM_API_KEY")
+        if api_base and api_key:
             kwargs["api_key"] = api_key
 
         resp = litellm.completion(**kwargs)
