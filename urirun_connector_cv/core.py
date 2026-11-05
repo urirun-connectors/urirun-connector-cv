@@ -89,22 +89,8 @@ def _llm_extract(text: str, model: str) -> dict[str, Any] | None:
             "Return ONLY the JSON object, no prose, no markdown fences.\n\nCV text:\n\n"
             + text[:12000]
         )
-        kwargs: dict[str, Any] = {
-            "model": model,
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0,
-            "max_tokens": 1500,
-        }
-        api_base = os.environ.get("CV_LLM_API_BASE") or os.environ.get("URIRUN_LLM_API_BASE") or os.environ.get("OPENAI_API_BASE")
-        if api_base:
-            kwargs["api_base"] = api_base
-            if not (model.startswith("openai/") or model.startswith("openrouter/")):
-                kwargs["model"] = f"openai/{model}"
-        api_key = os.environ.get("CV_LLM_API_KEY") or os.environ.get("OQLLM_API_KEY") or os.environ.get("OPENAI_API_KEY")
-        if api_key:
-            kwargs["api_key"] = api_key
-
-        resp = litellm.completion(**kwargs)
+        resp = litellm.completion(model=model, messages=[{"role": "user", "content": prompt}],
+                                  temperature=0, max_tokens=1500)
         out = resp["choices"][0]["message"]["content"]
         match = _JSON_OBJECT_RE.search(out)
         return _json.loads(match.group(0)) if match else None
