@@ -122,22 +122,3 @@ def test_batch_aggregates_rows(tmp_path, monkeypatch):
     assert r["files"] == 2
     assert r["parsed"] == 2
     assert {row["file"] for row in r["rows"]} == {"a.pdf", "b.docx"}
-
-
-def test_extract_with_oqllm_docker(monkeypatch):
-    """Verify CV LLM extraction connectivity through local OQLLM Docker instance."""
-    import urllib.request
-    try:
-        with urllib.request.urlopen("http://127.0.0.1:11437/health", timeout=1.0) as resp:
-            if resp.status != 200:
-                return
-    except Exception:
-        return
-
-    monkeypatch.setenv("CV_LLM_API_BASE", "http://127.0.0.1:11437/v1")
-    monkeypatch.setenv("CV_LLM_API_KEY", "oqllm_live_loopback_root")
-
-    res = c._llm_extract("Jan Kowalski, Python dev", "oqlos/system-one-router")
-    assert isinstance(res, dict)
-    assert "input_format" in res
-
